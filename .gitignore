@@ -41,6 +41,7 @@
 *.xz
 Module.symvers
 modules.builtin
+release.sh
 
 #
 # Top-level generic files
