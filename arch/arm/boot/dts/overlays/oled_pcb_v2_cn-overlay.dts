@@ -1,0 +1,55 @@
+/*
+ * Device Tree overlay for gov-400 panel 
+ *
+ */
+
+/dts-v1/;
+/plugin/;
+
+/ {
+        fragment@0 {
+                target = <&i2c_dsi>;
+                __overlay__ {
+                        #address-cells = <1>;
+                        #size-cells = <0>;
+                        status = "okay";
+
+			tlc59208: tlc59208@20 {
+				#address-cells = <1>;
+				#size-cells = <0>;
+				compatible = "ti,tlc59208";
+				reg = <0x20>;
+//				reset-gpio = <&pca9536 3 0>;
+
+				blue0@0 {
+					label = "button:blue0";
+					reg = <0x1>;
+				};
+				green0@1 {
+					label = "button:green0";
+					reg = <0x0>;
+				};
+				red0@2 {
+					label = "button:red0";
+					reg = <0x2>;
+				};
+				blue1@3 {
+					label = "button:blue1";
+					reg = <0x4>;
+				};
+				green1@4 {
+					label = "button:green1";
+					reg = <0x3>;
+				};
+				red1@5 {
+					label = "button:red1";
+					reg = <0x5>;
+				};
+
+                        };
+                };
+
+        };
+
+
+};

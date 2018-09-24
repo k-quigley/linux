@@ -1,0 +1,30 @@
+// Definitions for TCS3472x () I2C Colour sensors on the main ARM I2C bus.
+/*
+ * Device tree overlay for i2c_bcm2708, i2c1 bus
+ *
+ * Compile:
+ * dtc -@ -I dts -O dtb -o i2c-sens-tcs3472.dtbo i2c-sens-tds3472.dts
+ */
+
+/dts-v1/;
+/plugin/;
+
+/{
+	compatible = "brcm,bcm2835", "brcm,bcm2708", "brcm,bcm2709";
+
+	fragment@0 {
+		target = <&i2c_arm>;
+		__overlay__ {
+                        #address-cells = <1>;
+                        #size-cells = <0>;
+			status = "okay";
+
+			tcs34725: tcs34725@29 {
+				compatible = "iio,tcs3472";
+				reg = <0x29>;
+				standby-gpio = <&gpio 25 0x01>;
+				led-gpio = <&gpio 22 0x01>;
+			};
+		};
+	};
+};

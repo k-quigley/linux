@@ -1,0 +1,23 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+   compatible = "brcm,bcm2835", "brcm,bcm2708", "brcm,bcm2709";
+
+
+    fragment@0 {
+        target = <&leds>;
+        __overlay__ {
+            tray: trayled {
+                label = "front:dispense";
+                gpios = <&gpio 8 0>;
+            };
+            bin: binled {
+                label = "rear:bin";
+                gpios = <&gpio 7 1>; /* Active low */
+		linux,default-trigger = "gpio";
+
+            };
+        };
+    };
+};

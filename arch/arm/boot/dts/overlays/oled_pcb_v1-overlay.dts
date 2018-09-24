@@ -1,0 +1,159 @@
+/*
+ * Device Tree overlay for gov-400 panel 
+ *
+ */
+
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "brcm,bcm2835", "brcm,bcm2708", "brcm,bcm2709";
+	fragment@0 {
+		target = <&dsi1>;
+		__overlay__  {
+			pitouchscreen: panel@0 {
+				status = "disabled";
+			};
+		};
+	};
+
+        fragment@1 {
+		target-path = "/";
+		__overlay__  {
+	                disp3v_reg: display_3v {
+        	                compatible = "regulator-fixed";
+                	        regulator-name = "disp-3v-supply";
+				regulator-min-microvolt = <3300000>;
+				regulator-max-microvolt = <3300000>;
+//		                gpio = <&pca9536 0 1>;
+				regulator-boot-on;
+			};
+
+	                disp4v6_reg: display_4v6 {
+        	                compatible = "regulator-fixed";
+                	        regulator-name = "disp-4v6-supply";
+				regulator-min-microvolt = <4600000>;
+				regulator-max-microvolt = <4600000>;
+//		                gpio = <&pca9536 2 0>;
+			};
+                };
+        };
+
+
+	fragment@2 {
+		target = <&dsi1>;
+		__overlay__  {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "disabled";
+
+			gvodisplay: gvo-display@0 {
+				compatible = "gov,rm67162";
+				reg = <0>;
+//		                reset-gpio = <&pca9536 1 0>;
+//		                enable-gpio = <&pca9536 2 0>;
+				power-supply = <&disp3v_reg>;
+				vss-supply = <&disp4v6_reg>;
+			};
+//			power-domains = <&power RPI_POWER_DOMAIN_DSI1>;
+		};
+
+	};
+
+        fragment@6 {
+                target = <&i2c_dsi>;
+                __overlay__ {
+                        #address-cells = <1>;
+                        #size-cells = <0>;
+                        status = "okay";
+
+                        pca9536: gpio@41 {
+                                compatible = "nxp,pca9536";
+                                gpio-controller;
+				#gpio-cells = <2>;
+                                reg = <0x41>;
+
+                                display_vcc_ctrl: display_vcc_ctrl {
+                                        gpios = <0 0>;
+                                        output-low;
+                                        line-name="display_vcc_pin";
+                                };
+
+                                display_reset: display_reset {
+                                        gpios = <1 0>;
+                                        output-low;
+                                        line-name="display_reset_pin";
+                                };
+
+                                display_vss_ctrl: display_vss_ctrl {
+                                        gpios = <2 0>;
+                                        output-low;
+                                        line-name="display_vss_pin";
+                                };
+
+                                led_reset: led_reset {
+                                        gpios = <&pca9536 3 0>;
+                                        output-low;
+                                        line-name="led_reset_pin";
+                                };
+			};
+
+			tlc59208: tlc59208@20 {
+				#address-cells = <1>;
+				#size-cells = <0>;
+				compatible = "ti,tlc59208";
+				reg = <0x20>;
+//				reset-gpio = <&pca9536 3 0>;
+
+				blue0@0 {
+					label = "button:blue0";
+					reg = <0x0>;
+				};
+				green0@1 {
+					label = "button:green0";
+					reg = <0x1>;
+				};
+				red0@2 {
+					label = "button:red0";
+					reg = <0x2>;
+				};
+				blue1@3 {
+					label = "button:blue1";
+					reg = <0x3>;
+				};
+				green1@4 {
+					label = "button:green1";
+					reg = <0x4>;
+				};
+				red1@5 {
+					label = "button:red1";
+					reg = <0x5>;
+				};
+
+                        };
+                };
+
+        };
+
+/*  This is for testing the DT based GPIO expander with something which the user
+** can "twiddle" to see it works.  Not enabled normally
+	fragment@7 {
+        	target = <&leds>;
+	        __overlay__ {
+	            test: testled {
+	                label = "test:LedReset";
+	                gpios = <&pca9536 2 0>;
+	            };
+		};
+	};
+*/
+
+
+/* These are variables which can be overridden by the options set in the dtoverlay 
+**        __overrides__ {
+**                gpiopin = <&pca9536_pins>,"brcm,pins:0";
+**                addr = <&pca9536>,"reg:0";
+**        };
+*/
+
+};

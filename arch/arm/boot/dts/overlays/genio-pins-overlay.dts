@@ -1,0 +1,96 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+   compatible = "brcm,bcm2835", "brcm,bcm2708", "brcm,bcm2709";
+
+    fragment@0 {
+        target = <&gpio>;
+        __overlay__ {
+
+		motor: motorEna_pin {
+		    label = "motor:en";
+		    brcm,pins = <6>;
+		    brcm,function = <0>; /* Input */
+		    brcm,pull = <1>;     /* Pull Dn */
+		    output-low;		 /* Doesn't work with BCM Pins */
+					 /* Using Pull Dn instead */
+		};
+
+//		motor: motorDir_pin {
+//		    label = "motor:dir";
+//		    brcm,pins = <24>;     
+//		    brcm,function = <0>; /* Input */
+//		    brcm,pull = <1>;     /* Pull Dn */
+//		    output-low;		 /* Doesn't work with BCM Pins */
+//					 /* Using Pull Dn instead */
+//		};
+
+//		X2: X2.6_pin {
+//		    label = "INT1";
+//		    brcm,pins = <27>;
+//		    brcm,function = <0>; /* Input */
+//		    brcm,pull = <2>;     /* Pull up */
+//		};
+
+		X2_Ena: X2.VccEn_pin {
+		    label = "X2_VccEna";
+		    brcm,pins = <12>;
+		    brcm,function = <0>; /* Input */
+		    brcm,pull = <1>;     /* Pull Dn */
+		    output-low;		 /* Doesn't work with BCM Pins */
+					 /* Using Pull Dn instead */
+		};
+
+
+// Check BCM22 - should be Color LED Enable
+// Check BCM25 - should be Color I2C Enable
+//		X12: X12.6_pin {
+//		    label = "INT2";
+//		    brcm,pins = <22>;
+//		    brcm,function = <0>; /* Input */
+//		    brcm,pull = <1>;     /* Pull Dn*/
+//		    output-low;		 /* Doesn't work with BCM Pins */
+//					 /* Using Pull Dn instead */
+//		};
+
+		X4: X4.6_pin {
+		    label = "X4_IO_0";
+		    brcm,pins = <23>;     /* GPIO6 */
+		    brcm,function = <0>; /* Input */
+		    brcm,pull = <2>;     /* Pull up */
+		};
+
+
+		X7: X7.3_pin {
+		    label = "BinFull";
+		    brcm,pins = <5>;
+		    brcm,function = <0>; /* Input */
+		    brcm,pull = <2>;     /* Pull up */
+		};
+
+		X3: X3.5_pin {
+		    label = "ProximityIO";
+		    brcm,pins = <19>;
+		    brcm,function = <0>; /* Input */
+		    brcm,pull = <2>;     /* Pull up */
+		};
+
+
+//		Header26: Header26_pin {
+//		    label = "BIN_LED";
+//		    brcm,pins = <7>;
+//		    brcm,function = <0>; /* Input */
+//		    brcm,pull = <2>;     /* Pull up */
+//		};
+//
+		Header28: Header28_pin {
+		    label = "Unused2";
+		    brcm,pins = <1>;
+		    brcm,function = <0>; /* Input */
+		    brcm,pull = <2>;     /* Pull up */
+		};
+
+        };
+    };
+};

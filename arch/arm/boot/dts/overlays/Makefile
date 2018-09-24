@@ -147,7 +147,14 @@ dtbo-$(CONFIG_ARCH_BCM2835) += \
 	vga666.dtbo \
 	w1-gpio.dtbo \
 	w1-gpio-pullup.dtbo \
-	wittypi.dtbo
+	wittypi.dtbo \
+	genio-leds.dtbo \
+	genio-pins.dtbo \
+	i2c-sens-tcs3472.dtbo \
+	oled_pcb_v1.dtbo \
+	oled_pcb_v2.dtbo \
+	oled_pcb_v2_cn.dtbo \
+	spi-leds-tlc5971.dtbo 
 
 targets += dtbs dtbs_install
 targets += $(dtbo-y)

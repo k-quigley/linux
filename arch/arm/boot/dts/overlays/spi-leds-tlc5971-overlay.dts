@@ -1,0 +1,86 @@
+// Definitions for TI TLC591xx (59108, 59208, 59116) I2C PWM controller on DSI I2C bus.
+/*
+ * Device tree overlay for i2c_bcm2708, i2c0 bus
+ *
+ * Compile:
+ * dtc -@ -I dts -O dtb -o i2c-leds-tlc591xx.dtbo i2c-leds-tlc591xx-overlay.dts
+ */
+
+/dts-v1/;
+/plugin/;
+
+/{
+	compatible = "brcm,bcm2835", "brcm,bcm2708", "brcm,bcm2709";
+
+	fragment@0 {
+		 target = <&spi0>;
+		__overlay__ {
+		        #address-cells = <1>;
+		        #size-cells = <0>;
+			num-cs = <0>;
+			// Fake GPIO setting to be sure the SPI driver does not use the default GPIO8
+			cs-gpios = <&gpio 23 1>;
+
+			spidev@0 {
+				status = "disabled";
+			};
+			tlc5971: tlc5971@0 {
+				compatible = "linux,leds-tlc5971";
+				reg = <0x0>;
+	                        #address-cells = <1>;
+                                #size-cells = <0>;
+				spi-max-frequency = <500000>;
+				led0@0 {
+					label = "front:led0";
+					reg = <0x0>;
+				};
+				led1@1 {
+					label = "front:led1";
+					reg = <0x1>;
+				};
+				led2@2 {
+					label = "front:led2";
+					reg = <0x2>;
+				};
+				led3@3 {
+					label = "front:led3";
+					reg = <0x3>;
+				};
+				led4@4 {
+					label = "front:led4";
+					reg = <0x4>;
+				};
+				led5@5 {
+					label = "front:led5";
+					reg = <0x5>;
+				};
+				led6@6 {
+					label = "front:led6";
+					reg = <0x6>;
+				};
+				led7@7 {
+					label = "front:led7";
+					reg = <0x7>;
+				};
+				led8@8 {
+					label = "front:led8";
+					reg = <0x8>;
+				};
+				led9@9 {
+					label = "front:led9";
+					reg = <0x9>;
+				};
+				led10@10 {
+					label = "front:led10";
+					reg = <0xA>;
+				};
+				led11@11 {
+					label = "front:led11";
+					reg = <0xB>;
+				};
+
+			};
+		};
+	};
+};
+
