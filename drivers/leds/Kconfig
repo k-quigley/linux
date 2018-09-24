@@ -558,6 +558,28 @@ config LEDS_TLC591XX
 	  This option enables support for Texas Instruments TLC59108
 	  and TLC59116 LED controllers.
 
+config LEDS_TLC592XX
+	tristate "LED driver for TLC59208 and similar controllers"
+	depends on LEDS_CLASS && I2C
+	select REGMAP_I2C
+	help
+	  This option enables support for Texas Instruments TLC59208
+	  and other TI TLC592xx LED controllers.
+
+config LEDS_TLC5940
+	tristate "LED driver for TLC59xx and similar SPI controllers"
+	depends on LEDS_CLASS && SPI
+	help
+	  This option enables support for Texas Instruments TLC5940
+	  and other TI TLC5940 LED controllers.
+
+config LEDS_TLC5971
+	tristate "LED driver for TLC5971 and similar SPI controllers"
+	depends on LEDS_CLASS && SPI
+	help
+	  This option enables support for Texas Instruments TLC5971
+	  and other TI TLC5971 LED controllers.
+
 config LEDS_MAX77693
 	tristate "LED support for MAX77693 Flash"
 	depends on LEDS_CLASS_FLASH

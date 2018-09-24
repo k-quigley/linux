@@ -27,6 +27,10 @@
 #include <linux/iio/buffer.h>
 #include <linux/iio/triggered_buffer.h>
 
+#include <linux/gpio.h>
+#include <linux/of_gpio.h>
+
+
 #define TCS3472_DRV_NAME "tcs3472"
 
 #define TCS3472_COMMAND BIT(7)
@@ -52,11 +56,14 @@
 #define TCS3472_ENABLE_PON BIT(0)
 #define TCS3472_CONTROL_AGAIN_MASK (BIT(0) | BIT(1))
 
+
 struct tcs3472_data {
 	struct i2c_client *client;
 	u8 enable;
 	u8 control;
 	u8 atime;
+        struct gpio_desc *ce_gpio;
+        struct gpio_desc *led_gpio;
 	u16 buffer[8]; /* 4 16-bit channels + 64-bit timestamp */
 };
 
@@ -249,6 +256,48 @@ static const struct iio_info tcs3472_info = {
 	.driver_module = THIS_MODULE,
 };
 
+/*
+ * device DeviceTree config parser
+ */
+
+static int tcs3472_parse_dt(struct device *dev, struct tcs3472_data *data)
+{
+	int ret = 0;
+
+	dev_info(dev," %s: Enter\n",__func__);
+
+	if (dev->of_node) {
+		struct device_node *np = dev->of_node;
+
+                data->ce_gpio = devm_gpiod_get_optional(dev, "standby",
+			GPIOD_OUT_HIGH);
+                if (data->ce_gpio) {
+                    if (IS_ERR(data->ce_gpio)) {
+                      ret = PTR_ERR(data->ce_gpio);
+                      dev_err(dev, "failed to request enable GPIO: %d\n", ret);
+                      return ret;
+                    }
+		    //dev_info(dev, "setup enable GPIO: \n");
+                }
+
+
+                data->led_gpio = devm_gpiod_get_optional(dev, "led",
+                	GPIOD_OUT_HIGH);
+                if (data->led_gpio) {
+                    if (IS_ERR(data->led_gpio)) {
+                      ret = PTR_ERR(data->led_gpio);
+                      dev_err(dev, "failed to request LED GPIO: %d\n", ret);
+                      return ret;
+                    }
+                    //dev_info(dev, "setup LED  GPIO: \n");
+                }
+
+	}
+	return ret;
+}
+
+
+
 static int tcs3472_probe(struct i2c_client *client,
 			   const struct i2c_device_id *id)
 {
@@ -256,13 +305,18 @@ static int tcs3472_probe(struct i2c_client *client,
 	struct iio_dev *indio_dev;
 	int ret;
 
+	//dev_info(&client->dev," %s: Enter\n",__func__);
+
 	indio_dev = devm_iio_device_alloc(&client->dev, sizeof(*data));
 	if (indio_dev == NULL)
 		return -ENOMEM;
 
+
 	data = iio_priv(indio_dev);
 	i2c_set_clientdata(client, indio_dev);
 	data->client = client;
+
+	ret = tcs3472_parse_dt(&client->dev, data);
 
 	indio_dev->dev.parent = &client->dev;
 	indio_dev->info = &tcs3472_info;
@@ -270,6 +324,17 @@ static int tcs3472_probe(struct i2c_client *client,
 	indio_dev->channels = tcs3472_channels;
 	indio_dev->num_channels = ARRAY_SIZE(tcs3472_channels);
 	indio_dev->modes = INDIO_DIRECT_MODE;
+
+	// power up
+        if (data->ce_gpio) {
+                //dev_info(&client->dev, "Enable ce gpio\n");
+                gpiod_set_value_cansleep(data->ce_gpio, 0);
+        }
+
+        if (data->led_gpio) {
+                //dev_info(&client->dev, "LED gpio\n");
+                gpiod_set_value_cansleep(data->led_gpio, 0);
+        }
 
 	ret = i2c_smbus_read_byte_data(data->client, TCS3472_ID);
 	if (ret < 0)
@@ -319,6 +384,7 @@ buffer_cleanup:
 	return ret;
 }
 
+
 static int tcs3472_powerdown(struct tcs3472_data *data)
 {
 	return i2c_smbus_write_byte_data(data->client, TCS3472_ENABLE,
@@ -327,11 +393,27 @@ static int tcs3472_powerdown(struct tcs3472_data *data)
 
 static int tcs3472_remove(struct i2c_client *client)
 {
+	struct tcs3472_data *data;
 	struct iio_dev *indio_dev = i2c_get_clientdata(client);
+
+	data = iio_priv(indio_dev);
 
 	iio_device_unregister(indio_dev);
 	iio_triggered_buffer_cleanup(indio_dev);
 	tcs3472_powerdown(iio_priv(indio_dev));
+
+	// power Down
+        if (data->ce_gpio) {
+                //dev_info(&client->dev, "Disable ce gpio\n");
+                gpiod_set_value_cansleep(data->ce_gpio, 1);
+        }
+        gpiod_put(data->ce_gpio);
+
+        if (data->led_gpio) {
+                //dev_info(&client->dev, "Disable LED gpio\n");
+                gpiod_set_value_cansleep(data->led_gpio, 1);
+        }
+        gpiod_put(data->led_gpio);
 
 	return 0;
 }
@@ -342,6 +424,13 @@ static int tcs3472_suspend(struct device *dev)
 	struct tcs3472_data *data = iio_priv(i2c_get_clientdata(
 		to_i2c_client(dev)));
 	return tcs3472_powerdown(data);
+
+	// power Dn LED
+	if (data->led_gpio)
+	{
+		gpio_direction_output(data->led_gpio,10;
+	}
+
 }
 
 static int tcs3472_resume(struct device *dev)
@@ -350,6 +439,14 @@ static int tcs3472_resume(struct device *dev)
 		to_i2c_client(dev)));
 	return i2c_smbus_write_byte_data(data->client, TCS3472_ENABLE,
 		data->enable | (TCS3472_ENABLE_AEN | TCS3472_ENABLE_PON));
+
+	// power up
+	if (data->led_gpio)
+	{
+		gpio_direction_output(data->led_gpio,1);
+	}
+
+
 }
 #endif
 
@@ -373,5 +470,6 @@ static struct i2c_driver tcs3472_driver = {
 module_i2c_driver(tcs3472_driver);
 
 MODULE_AUTHOR("Peter Meerwald <pmeerw@pmeerw.net>");
+MODULE_AUTHOR("Kevin Quigley<kevin@kquigley.co.uk>");
 MODULE_DESCRIPTION("TCS3472 color light sensors driver");
 MODULE_LICENSE("GPL");
